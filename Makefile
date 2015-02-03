@@ -1,33 +1,33 @@
-TWO_POW = 10
+T = 10
 
 all: bquick bmerge bradix bother
 
 bquick: quicksort.c
-	gcc quicksort.c -o quicksort.o 
+	@gcc quicksort.c -o quicksort.o 
 
 bmerge: mergesort.c
-	gcc mergesort.c -o mergesort.o
+	@gcc mergesort.c -o mergesort.o
 
 bradix: radixsort.c
-	gcc radixsort.c -o radixsort.o
+	@gcc radixsort.c -o radixsort.o
 
 bother: othersort.c
-	gcc othersort.c -o othersort.o
+	@gcc othersort.c -o othersort.o
 
 yo:
-	@echo "yo $(TWO_POW)"
+	@echo "yo $(T)"
 
 quick: bquick
-	./quicksort.o $(TWO_POW)
+	@./quicksort.o $(T)
 
 merge: bmerge
-	./mergesort.o $(TWO_POW)
+	@./mergesort.o $(T)
 
 radix: bradix
-	./radixsort.o $(TWO_POW)
+	@./radixsort.o $(T)
 
 other: bother
-	./othersort.o $(TWO_POW)
+	@./othersort.o $(T)
 
 clean:
 	rm *.o
