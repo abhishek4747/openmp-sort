@@ -8,7 +8,7 @@ typedef enum {
 }  SortType;
 
 typedef struct {
-   long long key;
+   long long *key;
    char payload[LOADSIZE];
 } dataType;
 
