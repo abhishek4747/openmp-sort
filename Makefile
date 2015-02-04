@@ -1,33 +1,39 @@
 T = 10
+P = 1
+S = q
 
-all: bquick bmerge bradix bother
+G_ARGS = -fPIC -c -g  -Wall
+
+all:
+	echo "try 'make test'"
 
 bquick: quicksort.cpp
-	@g++ -fopenmp quicksort.cpp -o quicksort.o 
+	@g++ -fopenmp $(G_ARGS) quicksort.cpp 
 
 bmerge: mergesort.cpp
-	@g++ -fopenmp mergesort.cpp -o mergesort.o
+	@g++ -fopenmp $(G_ARGS) mergesort.cpp 
 
 bradix: radixsort.cpp
-	@g++ -fopenmp radixsort.cpp -o radixsort.o
+	@g++ -fopenmp $(G_ARGS) radixsort.cpp 
 
 bother: othersort.cpp
-	@g++ -fopenmp othersort.cpp -o othersort.o
+	@g++ -fopenmp $(G_ARGS) othersort.cpp 
 
-yo:
-	@echo "yo $(T)"
+bsort: sort.cpp
+	@g++ -fopenmp $(G_ARGS) sort.cpp
 
-quick: bquick
-	@./quicksort.o $(T) $(P)
+ball: bquick bmerge bradix bother bsort
 
-merge: bmerge
-	@./mergesort.o $(T) $(P)
+blib: ball
+	@g++ -shared -o libpsort.so quicksort.o mergesort.o radixsort.o othersort.o sort.o
 
-radix: bradix
-	@./radixsort.o $(T) $(P)
+btest: blib test.cpp 
+	@g++ -fopenmp test.cpp -o test -L. -lpsort
 
-other: bother
-	@./othersort.o $(T) $(P)
+test: btest
+	@LD_LIBRARY_PATH=. ./test $(T) $(P) $(S)
 
 clean:
-	rm *.o
+	rm -f *.o
+	rm -f *.so
+	clear

@@ -1,4 +1,5 @@
 #include "payloadsize.h"  // Defines LOADSIZE
+
 typedef enum {
 	QUICK,
 	MERGE,
@@ -7,7 +8,7 @@ typedef enum {
 }  SortType;
 
 typedef struct {
-   long long *key;
+   long long key;
    char payload[LOADSIZE];
 } dataType;
 
