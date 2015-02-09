@@ -11,6 +11,7 @@ using namespace std;
 // GLOBALS
 SortType sorttype = QUICK;
 int NUM_OF_ELEMENTS =  1<<20;
+int MIN_NUM = 1<<15;
 int isParallel = 1;
 
 //#define BINARY 1
@@ -96,7 +97,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 	set <long long> s1;
-	if (NUM_OF_ELEMENTS < (1<<15)){
+	if (NUM_OF_ELEMENTS < MIN_NUM){
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
 			s1.insert((long long)data[i].key);
 		}
@@ -123,7 +124,7 @@ int main(int argc, char *argv[]){
 	/* -------------------------- */
 	begin = clock();	
 	set <long long> s2;	
-	if (NUM_OF_ELEMENTS < (1<<15)){
+	if (NUM_OF_ELEMENTS < MIN_NUM){
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
 			s2.insert((long long)data[i].key);
 		}

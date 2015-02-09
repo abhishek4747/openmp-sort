@@ -22,26 +22,40 @@ void  merge  (dataType *datal , int sizel , dataType *datar , int sizer , dataTy
         data2[i3++] = datar[i2++];
     }
 
-    int size = sizel + sizer;
-    //#pragma omp parallel for private(size)
-    for (int i = 0; i < size; ++i)
-    {
-    	datal[i] = data2[i];
-    }
+    //int size = sizel + sizer;
+    //#pragma omp parallel for
+    //for (int i = 0; i < size; ++i)
+    //{
+		//cout<<(long long)datal[i].key<<", ";
+    //	datal[i] = data2[i];
+		//if (i==sizel)
+		//	cout<<" --- ";
+    //}
+	//cout<<endl;
+
+	//for (int i =0; i<size; ++i){
+		//cout<<(long long)datal[i].key<<", ";	
+	//}
+	//cout<<endl<<endl;
 }
 
 
 void mergesort(dataType *data, int size, dataType *data2){
-	if (size<2){
-		return;
-	}else{
-		//#pragma omp parallel num_threads(2)
-		//{	
-		//	if (omp_get_thread_num()==0)
-				mergesort(data,size/2,data2);
-		//	else
-				mergesort(data+size/2,(size+1)/2,data2+size/2);
-		//}
-		merge(data,size/2,data+size/2, (size+1)/2,data2);
+	if (size>1){
+		//#pragma omp parallel if (size>8 && false)
+		{	
+			//#pragma omp single  
+			{
+				//#pragma omp task 
+				{
+					mergesort(data,size/2,data2);
+				}
+				//#pragma omp task 
+				{
+					mergesort(data+size/2,(size+1)/2,data2+size/2);
+				}
+			}
+		}
+		merge(data2,size/2,data2+size/2, (size+1)/2,data);
 	}
 }
