@@ -11,15 +11,40 @@ void swap(dataType *data, int left, int right){
 	data[right] = temp;
 }
 
+int partition(dataType *data, int start, int end){
+	int pi = end-1;
+	int store = start;
+	for (int i = start; i<end-1; i++){
+		if (data[i].key<=data[pi].key){
+			swap(data, i, store);
+			store++;
+		}
+	}	
+	swap(data, pi, store);
+	return store;
+
+}
+
 void quicksort(dataType *data, int start, int end){
-	if (start+1<end){
-		cout<<start<<" "<<end<<"IN"<<endl;
+	if (start+2==end){
+		if (data[start].key>data[start+1].key){
+			swap(data, start, start+1);
+		}
+	}
+	else if (start+1<end){
+		/*for	(int i = start; i<end; i++){
+			cout<<(long long)data[i].key<<", ";
+		}
+		cout<<endl;*/
+		int pivot = partition(data, start, end);
+		/*
+		//cout<<start<<" "<<end<<"IN"<<endl;
 		int left, right;
 		int sorted = 1;
 	    for(left = start+1, right = end-1; left < right; ){
-			while (left<right && data[left].key <= data[start].key)
+			while (left<end && data[left].key <= data[start].key)
 				left++;
-			while (left<right && data[right].key > data[start].key)
+			while (start<right && data[right].key > data[start].key)
 				right--;
 	        if(left<right && data[left].key > data[start].key && data[right].key <= data[start].key){
 //	            cout<<(long long)data[left].key<<"dd -- "<<(long long)data[right].key<<endl;
@@ -27,29 +52,43 @@ void quicksort(dataType *data, int start, int end){
 //	            cout<<(long long)data[left].key<<" -- "<<(long long)data[right].key<<endl<<endl;
 				sorted = 0;
 	        }
+
 	    }
-for	(int i=start; i<end; i++)
+		
+for	(int i = start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
+		}
 		cout<<endl;
-
-
-	    swap(data, start, --left);
-		for	(int i=start; i<end; i++)
+			
+		if (right!=end-1){
+			//++right;
+		}
+		if (left!=start+1){
+			//--left;
+	    	swap(data, start, --left);
+		}
+		*/
+		/*
+		cout<<"pivot: "<<pivot-start<<" \t";
+		for	(int i = start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
-		cout<<endl;
-
+		}
+		cout<<endl<<endl;
+		*/
+		if (start+1<pivot)
+			quicksort(data, start, pivot);
+		if (pivot+2<end)
+			quicksort(data, pivot+1, end);
 		// if (!sorted){
 			//#pragma omp parallel num_threads(2)
 			{
 				//if (omp_get_thread_num()==0){
-					quicksort(data, start, left);
 				//}else{
-					quicksort(data, right, end);
 				//}
 			}
 		// }	
 	}else{
-		cout<<start<<" "<<end<<endl;
+		//cout<<start<<" "<<end<<endl;
 	}
 
 }
