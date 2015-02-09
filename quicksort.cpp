@@ -17,14 +17,26 @@ void quicksort(dataType *data, int start, int end){
 		int left, right;
 		int sorted = 1;
 	    for(left = start+1, right = end-1; left < right; ){
-	        if(data[left].key > data[start].key && data[right].key <= data[start].key){
-	            swap(data, left, right);
+			while (left<right && data[left].key <= data[start].key)
+				left++;
+			while (left<right && data[right].key > data[start].key)
+				right--;
+	        if(left<right && data[left].key > data[start].key && data[right].key <= data[start].key){
+//	            cout<<(long long)data[left].key<<"dd -- "<<(long long)data[right].key<<endl;
+				swap(data, left, right);
+//	            cout<<(long long)data[left].key<<" -- "<<(long long)data[right].key<<endl<<endl;
 				sorted = 0;
 	        }
-	        if(data[left].key <= data[start].key) left++;
-	        if(data[right].key > data[start].key) right--;
 	    }
-	    // swap(data, start, --left);
+for	(int i=start; i<end; i++)
+			cout<<(long long)data[i].key<<", ";
+		cout<<endl;
+
+
+	    swap(data, start, --left);
+		for	(int i=start; i<end; i++)
+			cout<<(long long)data[i].key<<", ";
+		cout<<endl;
 
 		// if (!sorted){
 			//#pragma omp parallel num_threads(2)

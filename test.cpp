@@ -17,8 +17,8 @@ int isParallel = 1;
 
 void arrayPrint(dataType *data, int n = NUM_OF_ELEMENTS){
 	for (int i = 0; i < n; ++i){
-		//cout<<(long long)data[i].key<<"\t";
-		cout<<(bitset<16>) ((long long) data[i].key)<<"\t";
+		cout<<(long long)data[i].key<<"\t";
+		//cout<<(bitset<16>) ((long long) data[i].key)<<"\t";
 		
 	}
 	cout<<"\n\n";
