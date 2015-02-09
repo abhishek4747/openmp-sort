@@ -11,7 +11,7 @@ using namespace std;
 // GLOBALS
 SortType sorttype = QUICK;
 int NUM_OF_ELEMENTS =  1<<20;
-int MIN_NUM = 1<<15;
+int MIN_NUM = 1<<20;
 int isParallel = 1;
 
 //#define BINARY 1
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]){
 		seed = rand()*omp_get_thread_num();
 		#pragma omp parallel for 
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
-			data[i].key = (long long *) (rand_r(&seed)>>20); // TODO: Generate a 64 bit number
+			data[i].key = (long long *) (rand_r(&seed)); // TODO: Generate a 64 bit number
 		}
 	}
 	set <long long> s1;

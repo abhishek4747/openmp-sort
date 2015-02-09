@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void  merge  (dataType *datal , int sizel , dataType *datar , int sizer , dataType *data2){
+inline void  merge  (dataType *datal , int sizel , dataType *datar , int sizer , dataType *data2){
     int i1 = 0, i2 = 0, i3 = 0;
        
     while (i1 < sizel && i2 < sizer) {
@@ -15,12 +15,24 @@ void  merge  (dataType *datal , int sizel , dataType *datar , int sizer , dataTy
             data2[i3++] = datar[i2++];
         }
     }
-    while (i1 < sizel) {   
-        data2[i3++] = datal[i1++];
-    }
-    while (i2 < sizer) { 
-        data2[i3++] = datar[i2++];
-    }
+	//#pragma omp parallel
+	{
+		//#pragma omp sections
+		{
+			//#pragma omp section
+			while (i1 < sizel) {   
+				data2[i3++] = datal[i1++];
+			}
+			//#pragma omp section
+			while(sizer-1>=i2){
+				--sizer;
+				data2[sizel + sizer] = datar[sizer];
+			}
+		}
+	}	
+    //while (i2 < sizer) { 
+    //    data2[i3++] = datar[i2++];
+    //}
 
     //int size = sizel + sizer;
     //#pragma omp parallel for
@@ -42,17 +54,17 @@ void  merge  (dataType *datal , int sizel , dataType *datar , int sizer , dataTy
 
 void mergesort(dataType *data, int size, dataType *data2){
 	if (size>1){
-		//#pragma omp parallel if (size>8 && false)
+		#pragma omp parallel if (size> 1<<10) num_threads(4)
 		{	
-			//#pragma omp single  
+			#pragma omp sections 
 			{
-				//#pragma omp task 
+				#pragma omp section
 				{
-					mergesort(data,size/2,data2);
+					mergesort(data2,size/2,data);
 				}
-				//#pragma omp task 
+				#pragma omp section
 				{
-					mergesort(data+size/2,(size+1)/2,data2+size/2);
+					mergesort(data2+size/2,(size+1)/2,data+size/2);
 				}
 			}
 		}
