@@ -7,6 +7,9 @@ G_ARGS = -fPIC -c -g  -Wall
 all:
 	echo "try 'make test'"
 
+bpsum: psum.cpp
+	g++ -fopenmp $(G_ARGS) psum.cpp
+
 bquick: quicksort.cpp
 	g++ -fopenmp $(G_ARGS) quicksort.cpp 
 
@@ -22,10 +25,10 @@ bother: othersort.cpp
 bsort: sort.cpp
 	g++ -fopenmp $(G_ARGS) sort.cpp
 
-ball: bquick bmerge bradix bother bsort
+ball: bquick bmerge bradix bother bsort bpsum
 
 blib: ball
-	g++ -shared -o libpsort.so quicksort.o mergesort.o radixsort.o othersort.o sort.o
+	g++ -shared -o libpsort.so quicksort.o mergesort.o radixsort.o othersort.o sort.o psum.o
 
 btest: blib test.cpp 
 	g++ -fopenmp test.cpp -o test -L. -lpsort

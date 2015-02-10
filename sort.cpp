@@ -3,6 +3,7 @@
 #include <stdlib.h>						// For exit(0)
 #include "sort.h"
 #include "quicksort.h"					// For quicksort
+#include "psum.h"
 #include "mergesort.h"					// For mergesort
 #include "radixsort.h"					// For radixsort
 #include "othersort.h"					// For othersort
@@ -13,7 +14,7 @@ void pSort(dataType *data, int ndata, SortType sorter){
 	dataType *data2;
 	switch (sorter){
 		case QUICK:
-			quicksort(data, 0, ndata);
+			pquicksort(data, 0, ndata);
 			break;
 		case MERGE:
 			data2=(dataType*)malloc(ndata*sizeof(dataType));

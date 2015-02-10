@@ -30,7 +30,7 @@ void psum(int *data, int size, int *data2){
 	}
 }
 
-/*
+
 void swap(dataType *data, int left, int right){
 	dataType temp = data[left];
 	data[left] = data[right];
@@ -38,8 +38,9 @@ void swap(dataType *data, int left, int right){
 }
 
 	
-void partition(dataType *data, int size){
+int partition(dataType *data, int size, dataType *data2){
 	int p = omp_get_num_procs();
+	cout<<"No. of processors: "<<p<<"\nsize:"<<size<<endl;
 	int *lessp;
 	int *greaterp;
 	lessp = (int*) malloc(p*sizeof(int));
@@ -56,30 +57,103 @@ void partition(dataType *data, int size){
 		cout<<"OUT OF MEMORY."<<endl;
 		exit(0);
 	}
-	#pragma omp parallel
+	int pivot = 0;
+	#pragma omp parallel 
 	{
-		int i = ome_get_thread_num();
+		int i = omp_get_thread_num();
 		int start = (size/p)*i;
-		int end = min(ceil(size/p)*(i+1),size);
-		int pi = end-1;
-		int store = start;
-		swap(data, start, pi);
-		for (int i = start; i<end-1; i++){
-			if ((long long)data[i].key<=(long long)data[pi].key){
-				swap(data, i, store);
-				store++;
+		int end = min((int)ceil(size/p)*(i+1),size);
+
+		//cout<<i<<" - "<<start<<" -  "<<end<<endl;
+		int store = end-1;
+		for (int j = start; j<=store;){
+			if ((long long)data[j].key>(long long)data[pivot].key){
+				swap(data, j, store);
+				store--;
+			}else{
+				j++;
 			}
 		}	
-		swap(data, pi, store);
-		lessp[i]=store;
-		greater[i] = end-start - store;
+		greaterp[i]=end - store - 1;
+		lessp[i] = store - start + 1;
 	}
 	psum(lessp,p,lessp2);
 	psum(greaterp,p,greaterp2);
+/*
+	for (int i =0; i<p; i++){
+		cout<<lessp[i]<<", ";
+	}
+	cout<<endl;
+	for (int i =0; i<p; i++){
+		cout<<greaterp[i]<<", ";
+	}
+	cout<<endl<<endl;
+		
+	for (int i =0; i<size; i++){
+		cout<<(long long)data[i].key<<", ";
+	}
+	cout<<endl<<endl;
+*/	
+	#pragma omp parallel 
+	{
+		int i = omp_get_thread_num();
+		int start = (size/p)*i;
+		int end = min((int)ceil(size/p)*(i+1),size);
+		int lp = (i>0? lessp[i-1]:0);
+		int dp = lessp[i];
+		
+		for (int j = 0; j<dp-lp; j++){
+			data2[lp+j] = data[start+j];
+		}
+		int gp = (i>0? greaterp[i-1]:0);
+		int gd = greaterp[i];
+		//cout<<i<<" - "<<lessp[p-1]<<" - "<<gp<<" - "<<gd-gp<<" - "<<dp<<" - "<<start+dp<<endl;
+		for (int j =0; j <gd-gp; j++){
+			data2[lessp[p-1]+gp+j] = data[start+dp-lp+j];
+		}
+	}
+	
+	swap(data2,0,lessp[p-1]-1);	
+	
+	#pragma omp parallel for
+	for (int i=0; i<size; i++){
+		data[i] = data2[i];
+	}
 }
-*/
+
+void pqsort(dataType *data, int start, int end, dataType *data2){
+	if (start+1>=end){
+		return;
+	} else if (start+2==end){
+		if ((long long)data[start].key> (long long)data[start+1].key){
+			swap(data, start, start+1);
+		}
+	}
+	else if (start+1<end){
+		//for(int i=0; i<end-start; i++){
+		//	cout<<(long long)data[i].key<<", ";
+		//}
+		cout<<end-start<<endl;
+		int store = partition(data+start, end-start, data2+start);
+		//for(int i=0; i<end-start; i++){
+		//	cout<<(long long)data[i].key<<", ";
+		//}
+		//cout<<endl;
+			pqsort(data, start, store, data2);
+			pqsort(data, store+1, end, data2);
+	}
+}
+
+void pquicksort(dataType *data, int start, int end){
+	
+	dataType *data2;
+	data2 = (dataType*) malloc((end-start)*sizeof(dataType));
+	pqsort(data, start, end, data2);
+}
+/*
 int main(){
 	int size = 20;
+	
 	int  *data;
 	data = (int *) malloc(size*sizeof(int));
 	int *data2;
@@ -103,7 +177,13 @@ int main(){
 	data[17] = 4;
 	data[18] = 11;
 	data[19] = 12;
-	/*
+	
+	dataType *data;
+	dataType *data2;
+	data = (dataType*) malloc(size*sizeof(dataType));
+	data2 = (dataType*) malloc(size*sizeof(dataType));
+
+	
 	data[0].key = (long long*) 7;
 	data[1].key = (long long*) 13;
 	data[2].key = (long long*) 18;
@@ -124,17 +204,18 @@ int main(){
 	data[17].key = (long long*) 12;
 	data[18].key = (long long*) 5;
 	data[19].key = (long long*) 8;
-	*/
+	
 	for (int i = 0; i<size; i++){
-		cout<<(long long)data[i]<<", ";
+		cout<<(long long)data[i].key<<", ";
 	}
 	cout<<endl;
 
-	psum(data, size, data2);
+	partition(data, size, data2);
 
 	for (int i = 0; i<size; i++){
-		cout<<(long long)data[i]<<", ";
+		cout<<(long long)data2[i].key<<", ";
 	}
 	cout<<endl;
 	return 0;
 }
+*/
