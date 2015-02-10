@@ -39,7 +39,7 @@ int isSorted(dataType* data, int n = NUM_OF_ELEMENTS){
 int main(int argc, char *argv[]){
 	
 	/* my timing toolset */
-	clock_t begin, end;
+	double begin, end;
 	double time_spent;
 	cout<<"\n\n\n\n";
 	/* set global args as per passed args */
@@ -86,16 +86,17 @@ int main(int argc, char *argv[]){
 	/* fill array with random numbers */
 	/* -------------------------- */
 	srand(rand());srand(rand());
-	begin = clock();
+	begin = omp_get_wtime();
 	unsigned seed;
 	#pragma omp parallel private(seed) if (isParallel)
 	{	
 		seed = rand()*omp_get_thread_num();
 		#pragma omp parallel for 
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
-			//data[i].key = (long long *)(((((long long)(rand_r(&seed))<<31)|(long long)r)<<2)|(long long)(r>>29));
-			//data[i].key = (long long *)(((long long)(rand_r(&seed))<<31)|r);
-			data[i].key = (long long *) rand_r(&seed);
+			int r = rand_r(&seed);
+			data[i].key = (long long *)(((((long long)(rand_r(&seed))<<31)|(long long)r)<<2)|(long long)(r>>29));
+			// data[i].key = (long long *)(((long long)(rand_r(&seed))<<31)|r);
+			// data[i].key = (long long *) r;
 		}
 	}
 	set <long long> s1;
@@ -104,8 +105,8 @@ int main(int argc, char *argv[]){
 			s1.insert((long long)data[i].key);
 		}
 	}
-	end = clock();
-	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	end = omp_get_wtime();
+	time_spent = (double)(end - begin);
 	cout<<"Time: "<<time_spent<<" seconds to fill the array.\n";
 	if (NUM_OF_ELEMENTS< 1<<4)
 		arrayPrint(data);
@@ -115,16 +116,16 @@ int main(int argc, char *argv[]){
 	
 	/* sort array */
 	/* -------------------------- */
-	begin = clock();	
+	begin = omp_get_wtime();	
 		pSort(data,NUM_OF_ELEMENTS,sorttype);
-	end = clock();
-	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	end = omp_get_wtime();
+	time_spent = (double)(end - begin);
 	cout<<"Time: "<<time_spent<<" seconds to sort the array.\n";
 	/* -------------------------- */
 
 	/* check array */
 	/* -------------------------- */
-	begin = clock();	
+	begin = omp_get_wtime();	
 	set <long long> s2;	
 	if (NUM_OF_ELEMENTS < MIN_NUM){
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
@@ -137,8 +138,8 @@ int main(int argc, char *argv[]){
 	if (s1.size()!=s2.size()){
 		cout<<"ARRAY CORRUPTED!!\n";
 	}
-	end = clock();
-	time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	end = omp_get_wtime();
+	time_spent = (double)(end - begin);
 	cout<<"Time: "<<time_spent<<" seconds to check if array is sorted.\n";
 	if (NUM_OF_ELEMENTS< 1<<4)
 		arrayPrint(data);

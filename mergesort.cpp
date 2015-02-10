@@ -86,7 +86,7 @@ void mergesort(dataType *data, int size, dataType *data2){
 	#pragma omp parallel   
 	{
 		//omp_set_nested(1);
-		#pragma omp for private(size)
+		#pragma omp for 
 		for (int i=0; i<size; i++){
 			data2[i] = data[i];
 		}

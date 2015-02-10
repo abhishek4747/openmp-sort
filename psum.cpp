@@ -9,16 +9,17 @@ using namespace std;
 void psum(int *data, int size, int *data2){
 	if (size<2)
 		return;
-	// Pairwise sum
+
+	// #1: Pairwise sum
 	int s = size>>1;
 	#pragma omp parallel for
 	for (int i=0; i< s; i++){
 		data2[i] = data[2*i] + data[2*i+1];
 	}
-	// Recurse
+	// #2: Recurse
 	psum(data2, s, data2+s);
 
-	// Finalize
+	// #3: Finalize
 	#pragma omp parallel for
 	for (int i=0; i<s; i++){
 		data[2*i] = data2[i] -data[2*i+1];
@@ -37,10 +38,58 @@ void swap(dataType *data, int left, int right){
 	data[right] = temp;
 }
 
+int lpartition(dataType *data, int size){
+	if (size==2){
+		if (data[0].key>data[1].key){
+			swap(data,0,1);
+		}
+		return 1;
+	}
+	int pivot = 0;
+	int start = 1;
+	int end = size-1;
+	while (start <end){
+		while (start<end && data[start].key<=data[pivot].key){
+			start++;
+		}
+		while (start<end && data[end].key>data[pivot].key){
+			end--;
+		}
+		if (start<end && data[start].key>data[end].key){
+			swap(data, start, end);
+		}
+	}
+	if (start==1){
+		return 0;
+	}else if (end ==size -1){
+		return 0;
+	}else{	
+	swap(data,start-1, pivot);
+		return start-1;
+	}
+
+/*	
+	int pivot = 0;
+	int store = size-1;
+	for (int i = 0; i<store; ){
+		if ((long long)data[i].key>(long long)data[pivot].key){
+			swap(data, i, store);
+			store--;
+		}else
+			i++;
+	}	
+	swap(data, pivot, store-1);
+	return store-1;
+	*/
+}
 	
 int partition(dataType *data, int size, dataType *data2){
+	if (size<2)
+		return 0;
 	int p = omp_get_num_procs();
-	cout<<"No. of processors: "<<p<<"\nsize:"<<size<<endl;
+	if (size<=p){
+		return lpartition(data, size);
+	}
 	int *lessp;
 	int *greaterp;
 	lessp = (int*) malloc(p*sizeof(int));
@@ -58,13 +107,17 @@ int partition(dataType *data, int size, dataType *data2){
 		exit(0);
 	}
 	int pivot = 0;
-	#pragma omp parallel 
+	int chunk = ceil(((double)size)/p);
+	p = ceil(((double)size)/chunk);
+
+	cout<<"No. of processors: "<<p<<"\nsize:"<<size<<endl;
+	#pragma omp parallel num_threads(p) 
 	{
 		int i = omp_get_thread_num();
-		int start = (size/p)*i;
-		int end = min((int)ceil(size/p)*(i+1),size);
-
+		int start = chunk*i;
+		int end = min((int)chunk*(i+1),size);
 		//cout<<i<<" - "<<start<<" -  "<<end<<endl;
+		/*
 		int store = end-1;
 		for (int j = start; j<=store;){
 			if ((long long)data[j].key>(long long)data[pivot].key){
@@ -73,12 +126,18 @@ int partition(dataType *data, int size, dataType *data2){
 			}else{
 				j++;
 			}
-		}	
+		}
+		*/
+		int pivot = lpartition(data+start, end-start);	
+		//cout<<"store:"<<store<<" pivot:"<<pivot<<endl;
+		int store = start + pivot;
 		greaterp[i]=end - store - 1;
 		lessp[i] = store - start + 1;
 	}
 	psum(lessp,p,lessp2);
 	psum(greaterp,p,greaterp2);
+	free(lessp2);
+	free(greaterp2);
 /*
 	for (int i =0; i<p; i++){
 		cout<<lessp[i]<<", ";
@@ -94,11 +153,11 @@ int partition(dataType *data, int size, dataType *data2){
 	}
 	cout<<endl<<endl;
 */	
-	#pragma omp parallel 
+	#pragma omp parallel num_threads(p)
 	{
 		int i = omp_get_thread_num();
-		int start = (size/p)*i;
-		int end = min((int)ceil(size/p)*(i+1),size);
+		int start = chunk*i;
+		int end = min(chunk*(i+1),size);
 		int lp = (i>0? lessp[i-1]:0);
 		int dp = lessp[i];
 		
@@ -115,10 +174,11 @@ int partition(dataType *data, int size, dataType *data2){
 	
 	swap(data2,0,lessp[p-1]-1);	
 	
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(p)
 	for (int i=0; i<size; i++){
 		data[i] = data2[i];
 	}
+	return (lessp[p-1]>0?lessp[p-1]-1:0);
 }
 
 void pqsort(dataType *data, int start, int end, dataType *data2){
@@ -130,16 +190,23 @@ void pqsort(dataType *data, int start, int end, dataType *data2){
 		}
 	}
 	else if (start+1<end){
-		//for(int i=0; i<end-start; i++){
-		//	cout<<(long long)data[i].key<<", ";
-		//}
-		cout<<end-start<<endl;
-		int store = partition(data+start, end-start, data2+start);
+		for(int i=0; i<end-start; i++){
+			cout<<(long long)data[i].key<<", ";
+		}
+		cout<<" ("<<end-start<<")"<<endl;
+		int store = lpartition(data+start, end-start);//, data2+start);
+		for(int i=0; i<end-start; i++){
+			cout<<(long long)data[i].key<<", ";
+		}
+		cout<<":"<<store<<":"<<endl<<endl;
+		//cout<<start<<" "<<store<<" "<<end<<endl;
 		//for(int i=0; i<end-start; i++){
 		//	cout<<(long long)data[i].key<<", ";
 		//}
 		//cout<<endl;
+			if (store<end)
 			pqsort(data, start, store, data2);
+			if (store+1>start)
 			pqsort(data, store+1, end, data2);
 	}
 }
@@ -150,10 +217,10 @@ void pquicksort(dataType *data, int start, int end){
 	data2 = (dataType*) malloc((end-start)*sizeof(dataType));
 	pqsort(data, start, end, data2);
 }
-/*
+
 int main(){
 	int size = 20;
-	
+	/*
 	int  *data;
 	data = (int *) malloc(size*sizeof(int));
 	int *data2;
@@ -177,11 +244,9 @@ int main(){
 	data[17] = 4;
 	data[18] = 11;
 	data[19] = 12;
-	
+	*/
 	dataType *data;
-	dataType *data2;
 	data = (dataType*) malloc(size*sizeof(dataType));
-	data2 = (dataType*) malloc(size*sizeof(dataType));
 
 	
 	data[0].key = (long long*) 7;
@@ -210,12 +275,12 @@ int main(){
 	}
 	cout<<endl;
 
-	partition(data, size, data2);
+	pquicksort(data, 0, size);
 
 	for (int i = 0; i<size; i++){
-		cout<<(long long)data2[i].key<<", ";
+		cout<<(long long)data[i].key<<", ";
 	}
 	cout<<endl;
 	return 0;
 }
-*/
+
