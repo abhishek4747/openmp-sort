@@ -20,14 +20,7 @@ void pSort(dataType *data, int ndata, SortType sorter){
 			if (data2==0){
 				cout<<"OUT OF MEMORY\n";
 				exit(0);
-			}
-			if (true){
-				#pragma omp parallel for
-				for (int i=0; i<ndata; i++){
-					data2[i] = data[i];
-				}
-			}else{
-			}
+			}			
 			mergesort(data,ndata,data2);
 			free(data2);
 			break;

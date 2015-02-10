@@ -8,7 +8,7 @@ inline void  merge  (dataType *datal , int sizel , dataType *datar , int sizer ,
     int i1 = 0, i2 = 0, i3 = 0;
        
     while (i1 < sizel && i2 < sizer) {
-        if (datal[i1].key < datar[i2].key) {
+        if ((long long) datal[i1].key < (long long)datar[i2].key) {
             data2[i3++] = datal[i1++];
         } 
         else {
@@ -19,22 +19,28 @@ inline void  merge  (dataType *datal , int sizel , dataType *datar , int sizer ,
 	{
 		//#pragma omp sections
 		{
-			//#pragma omp section
-			while (i1 < sizel) {   
+			//int i1o = i3 - i1;
+			//#pragma omp parallel for 
+			//for (int i=i1;i < sizel;i++) {   
+			//	data2[i + i1o] = datal[i];
+			//}
+			while(i1<sizel)
 				data2[i3++] = datal[i1++];
-			}
+			while(i2<sizel)
+				data2[i3++] = datar[i2++];
 			//#pragma omp section
-			while(sizer-1>=i2){
-				--sizer;
-				data2[sizel + sizer] = datar[sizer];
-			}
+			//for(;sizer-1>=i2;){
+			//	--sizer;
+			//	data2[sizel + sizer] = datar[sizer];
+			//}
+			//int i2o = i3 - i2;
+			//#pragma omp parallel for 
+			//for (int i=i2;i < sizer;i++) { 
+			//    data2[i + i2o] = datar[i];
+			//}
 		}
 	}	
-    //while (i2 < sizer) { 
-    //    data2[i3++] = datar[i2++];
-    //}
-
-    //int size = sizel + sizer;
+        //int size = sizel + sizer;
     //#pragma omp parallel for
     //for (int i = 0; i < size; ++i)
     //{
@@ -51,23 +57,45 @@ inline void  merge  (dataType *datal , int sizel , dataType *datar , int sizer ,
 	//cout<<endl<<endl;
 }
 
-
-void mergesort(dataType *data, int size, dataType *data2){
+void msort(dataType *data, int size, dataType *data2){
 	if (size>1){
-		#pragma omp parallel if (size> 1<<10) num_threads(4)
+		int siz = size>>1;
+		int siz1 = (size+1)>>1;
 		{	
-			#pragma omp sections 
 			{
-				#pragma omp section
+				#pragma omp task if (size > 1<<20)
 				{
-					mergesort(data2,size/2,data);
+					msort(data2,siz,data);
 				}
-				#pragma omp section
+				#pragma omp task if (size > 1 <<20)
 				{
-					mergesort(data2+size/2,(size+1)/2,data+size/2);
+					msort(data2+siz, siz1, data+siz);
 				}
 			}
 		}
-		merge(data2,size/2,data2+size/2, (size+1)/2,data);
+
+		#pragma omp taskwait
+		
+		{
+			merge(data2,siz,data2+siz, siz1,data);
+		}
 	}
 }
+
+void mergesort(dataType *data, int size, dataType *data2){
+	#pragma omp parallel   
+	{
+		//omp_set_nested(1);
+		#pragma omp for private(size)
+		for (int i=0; i<size; i++){
+			data2[i] = data[i];
+		}
+
+		#pragma omp master
+		{
+			msort(data, size, data2);	
+		}
+	}
+}
+
+
