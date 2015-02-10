@@ -18,8 +18,8 @@ int isParallel = 1;
 
 void arrayPrint(dataType *data, int n = NUM_OF_ELEMENTS){
 	for (int i = 0; i < n; ++i){
-		cout<<(long long)data[i].key<<"\t";
-		//cout<<(bitset<16>) ((long long) data[i].key)<<"\t";
+		//cout<<(long long)data[i].key<<"\t";
+		cout<<(bitset<64>) ((long long) data[i].key)<<"\n";
 		
 	}
 	cout<<"\n\n";
@@ -28,7 +28,7 @@ void arrayPrint(dataType *data, int n = NUM_OF_ELEMENTS){
 int isSorted(dataType* data, int n = NUM_OF_ELEMENTS){
 	long long *first = data[0].key;
 	for (int i = 1; i < n; ++i){
-		if (data[i-1].key > data[i].key){
+		if ((long long) data[i-1].key > (long long) data[i].key){
 			return 0;
 		}
 	}
@@ -93,7 +93,10 @@ int main(int argc, char *argv[]){
 		seed = rand()*omp_get_thread_num();
 		#pragma omp parallel for 
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
-			data[i].key = (long long *) (rand_r(&seed)); // TODO: Generate a 64 bit number
+			int r = rand_r(&seed);
+			//data[i].key = (long long *)(((((long long)(rand_r(&seed))<<31)|(long long)r)<<2)|(long long)(r>>29));
+			//data[i].key = (long long *)(((long long)(rand_r(&seed))<<31)|r);
+			data[i].key = (long long *) r;
 		}
 	}
 	set <long long> s1;
