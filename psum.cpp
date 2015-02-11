@@ -217,10 +217,15 @@ void pqsort(dataType *data, int start, int end, dataType *data2){
 	}
 }
 
-void pquicksort(dataType *data, int start, int end){
+void pquicksort(dataType *data, int size){
 	dataType *data2;
-	data2 = (dataType*) malloc((end-start)*sizeof(dataType));
-	pqsort(data, start, end, data2);
+	data2 = (dataType*) malloc(size*sizeof(dataType));
+	if (data2==0){
+		cout<<"OUT OF MEMORY"<<endl;
+		exit(0);
+	}
+	pqsort(data, 0, size, data2);
+	free(data2);
 }
 
 int main(){
@@ -255,7 +260,7 @@ int main(){
 	cout<<endl;
 
 
-	pquicksort(data, 0,  17);
+	pquicksort(data,  17);
 
 	for (int i = 0; i<size; i++){
 		cout<<(long long)data[i].key<<", ";

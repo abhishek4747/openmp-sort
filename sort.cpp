@@ -10,32 +10,19 @@
 
 using namespace std;
 
-void pSort(dataType *data, int ndata, SortType sorter){
-	dataType *data2;
+void pSort(dataType *data, int size, SortType sorter){
 	switch (sorter){
 		case QUICK:
-			pquicksort(data, 0, ndata);
+			quicksort(data,size);
 			break;
-		case MERGE:
-			data2=(dataType*)malloc(ndata*sizeof(dataType));
-			if (data2==0){
-				cout<<"OUT OF MEMORY\n";
-				exit(0);
-			}			
-			mergesort(data,ndata,data2);
-			free(data2);
+		case MERGE:		
+			mergesort(data,size);
 			break;
 		case RADIX:
-			data2=(dataType*)malloc(ndata*sizeof(dataType));
-			if (data2==0){
-				cout<<"OUT OF MEMORY\n";
-				exit(0);
-			}
-			radixsort(data,ndata,data2);
-			free(data2);
+			radixsort(data,size);
 			break;
 		default:
-			quicksort(data,0,ndata);
+			pquicksort(data,size);
 	}
 }
 

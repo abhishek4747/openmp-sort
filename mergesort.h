@@ -3,6 +3,6 @@
 #endif
 
 
-void mergesort(dataType *data, int size, dataType *data2);
+void mergesort(dataType *data, int size);
 
 

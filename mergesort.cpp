@@ -1,5 +1,3 @@
-#include <iostream>
-#include <omp.h>
 #include "mergesort.h"
 #include "helper.h"
 
@@ -83,7 +81,12 @@ void msort(dataType *data, int size, dataType *data2){
 	}
 }
 
-void mergesort(dataType *data, int size, dataType *data2){
+void mergesort(dataType *data, int size){
+	dataType* data2=(dataType*)malloc(size*sizeof(dataType));
+	if (data2==0){
+		cout<<"OUT OF MEMORY\n";
+		exit(0);
+	}
 	#pragma omp parallel   
 	{
 		//omp_set_nested(1);
@@ -97,6 +100,7 @@ void mergesort(dataType *data, int size, dataType *data2){
 			msort(data, size, data2);	
 		}
 	}
+	free(data2);
 }
 
 

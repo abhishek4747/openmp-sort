@@ -91,7 +91,12 @@ void rsort(dataType *data, int size, dataType *data2, int digit){
 }
 
 
-void radixsort(dataType *data, int size, dataType *data2, int digit){
+void radixsort(dataType *data, int size, int digit){
+	dataType *data2 = (dataType*)malloc(size*sizeof(dataType));
+	if (data2==0){
+		cout<<"OUT OF MEMORY\n";
+		exit(0);
+	}
 	#pragma omp parallel
 	{
 		#pragma omp single
@@ -99,4 +104,5 @@ void radixsort(dataType *data, int size, dataType *data2, int digit){
 			rsort(data, size, data2, digit);
 		}
 	}
+	free(data2);
 }

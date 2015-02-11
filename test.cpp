@@ -1,5 +1,4 @@
 #include <iostream>						// For IO
-#include <time.h>						// For timing
 #include <stdlib.h>						// For exit(0)
 #include <omp.h>
 #include <bitset>
@@ -10,6 +9,7 @@
 using namespace std;
 
 // GLOBALS
+#define DEBUG 1
 SortType sorttype = QUICK;
 int NUM_OF_ELEMENTS =  1<<20;
 int MIN_NUM = 1<<20;
@@ -20,18 +20,17 @@ int isParallel = 1;
 void arrayPrint(dataType *data, int n = NUM_OF_ELEMENTS){
 	for (int i = 0; i < n; ++i){
 		if (sorttype!=RADIX)
-			cout<<(long long)data[i].key<<"\t";
+			cout<<getkey(data,i)<<"\t";
 		else
-			cout<<(bitset<64>) ((long long) data[i].key)<<"\n";
+			cout<<(bitset<64>) getkey(data, i)<<"\n";
 		
 	}
-	cout<<"\n\n";
+	cout<<"\n"<<endl;
 }
 
 int isSorted(dataType* data, int n = NUM_OF_ELEMENTS){
-	long long *first = data[0].key;
 	for (int i = 1; i < n; ++i){
-		if ((long long) data[i-1].key > (long long) data[i].key){
+		if (getkey(data,i-1) > getkey(data,i)){
 			return 0;
 		}
 	}
@@ -58,19 +57,19 @@ int main(int argc, char *argv[]){
 		switch (argv[3][0]){
 			case 'q':
 				sorttype = QUICK;
-				cout<<"\t\tQUICKSORT\n";
+				cout<<"\t\tQUICKSORT"<<endl;
 				break;
 			case 'm':
 				sorttype = MERGE;
-				cout<<"\t\tMERGESORT\n";
+				cout<<"\t\tMERGESORT"<<endl;
 				break;
 			case 'r':
 				sorttype = RADIX;
-				cout<<"\t\tRADIXSORT\n";
+				cout<<"\t\tRADIXSORT"<<endl;
 				break;
 			default:
 				sorttype = BEST;
-				cout<<"\t\tBESTSORT\n";
+				cout<<"\t\tBESTSORT"<<endl;
 		}
 	}
 
@@ -80,8 +79,6 @@ int main(int argc, char *argv[]){
 	if (data==0){
 		cout<<"OUT OF MEMORY.\n";
 		exit(0);
-	}else{
-		cout<<"Sorting "<<NUM_OF_ELEMENTS<<" integers.\n";
 	}
 
 	
@@ -105,12 +102,12 @@ int main(int argc, char *argv[]){
 	set <long long> s1;
 	if (NUM_OF_ELEMENTS < MIN_NUM){
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
-			s1.insert((long long)data[i].key);
+			s1.insert(getkey(data,i));
 		}
 	}
 	end = omp_get_wtime();
 	time_spent = (double)(end - begin);
-	cout<<"Time: "<<time_spent<<" seconds to fill the array.\n";
+	cout<<"Time: "<<time_spent<<" seconds to fill the array with "<<NUM_OF_ELEMENTS<<" numbers."<<endl;
 	if (NUM_OF_ELEMENTS< 1<<4)
 		arrayPrint(data);
 	
@@ -123,7 +120,7 @@ int main(int argc, char *argv[]){
 		pSort(data,NUM_OF_ELEMENTS,sorttype);
 	end = omp_get_wtime();
 	time_spent = (double)(end - begin);
-	cout<<"Time: "<<time_spent<<" seconds to sort the array.\n";
+	cout<<"Time: "<<time_spent<<" seconds to sort the array of "<<NUM_OF_ELEMENTS<<" numbers."<<endl;
 	/* -------------------------- */
 
 	/* check array */
@@ -132,7 +129,7 @@ int main(int argc, char *argv[]){
 	set <long long> s2;	
 	if (NUM_OF_ELEMENTS < MIN_NUM){
 		for (int i = 0; i < NUM_OF_ELEMENTS; ++i){
-			s2.insert((long long)data[i].key);
+			s2.insert(getkey(data,i));
 		}
 	}
 	if (!isSorted(data)){
@@ -143,7 +140,7 @@ int main(int argc, char *argv[]){
 	}
 	end = omp_get_wtime();
 	time_spent = (double)(end - begin);
-	cout<<"Time: "<<time_spent<<" seconds to check if array is sorted.\n";
+	cout<<"Time: "<<time_spent<<" seconds to check if array is sorted."<<endl;
 	if (NUM_OF_ELEMENTS< 1<<4)
 		arrayPrint(data);
 	

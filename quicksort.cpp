@@ -63,12 +63,12 @@ void qsort(dataType *data, int start, int end){
 	}
 }
 
-void quicksort(dataType *data, int start, int end){
+void quicksort(dataType *data, int size){
 	#pragma omp parallel
 	{
 		#pragma omp single nowait
 		{
-			qsort(data, start, end);
+			qsort(data, 0, size);
 		}
 	}
 }

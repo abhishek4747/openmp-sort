@@ -3,4 +3,4 @@
 #endif
 
 void psum(int *data, int size, int *data2);
-void pquicksort(dataType *data, int start, int end);
+void pquicksort(dataType *data, int size);
