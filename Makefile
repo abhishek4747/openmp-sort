@@ -37,7 +37,7 @@ btest: blib test.cpp
 	@g++ -fopenmp test.cpp -o test -L. -lpsort
 
 test: btest
-	@LD_LIBRARY_PATH=. ./test $(T) $(P) $(S)
+	LD_LIBRARY_PATH=. ./test $(T) $(P) $(S)
 
 clean:
 	rm -f *.o
