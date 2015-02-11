@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#define R 1
+#define R 3
 #define RADIX (1<<R)
 
 int shift(int digit){
@@ -69,40 +69,30 @@ void rsort(dataType *data, int size, dataType *data2, int digit){
 	int *bsize;
 	int *bstart;
 	int *bstart2;
-	bsize = (int*) malloc(RADIX*sizeof(int));
-	bstart = (int*) malloc(RADIX*sizeof(int));
-	bstart2 = (int*) malloc(RADIX*sizeof(int));
-	if (bsize==0 || bstart==0 || bstart2==0){
-		cout<<"OUT OF MEMORY.\n";
-		exit(0);
+	//#pragma omp critical
+	{
+		bsize = (int*) malloc(RADIX*sizeof(int));
+		bstart = (int*) malloc(RADIX*sizeof(int));
+		bstart2 = (int*) malloc(RADIX*sizeof(int));
+		if (bsize==0 || bstart==0 || bstart2==0){
+			cout<<"OUT OF MEMORY.\n";
+			exit(0);
+		}
 	}
 	memset(bsize, 0, RADIX*sizeof(int));
 
 	make_buckets(data, size, data2, digit, bsize, bstart, bstart2);
-	// memcpy(bstart2, bstart, RADIX*sizeof(int));
-
-	//cout<<"Digit: "<<digit<<" shift: "<<shift(digit)<<" "<<endl;
-	//for (int i = 0; i < RADIX; ++i){
-	// 	cout<<bsize[i]<<","<<bstart2[i]<<"\t";
-	 //}
-	 //cout<<endl;
-	
 	for (int i = 0; i < size;i++){
 		data[i] = data2[i];
 	}
-	
-	//return;
+	//#pragma omp for
 	for (int i = 0; i < RADIX; ++i){
-		if (bsize[i]>0){
-			// cout<<"digit:"<<digit<<" Bucket:"<<i<<" start:"<<bstart2[i]<<" size:"<<bsize[i]<<endl;
-			//cout<<"Bucket: "<<i<<" Digit:"<<digit<<endl;
-			//#pragma omp task if (bsize[i]> 1<<20)
-			{
-				rsort(data+bstart2[i],bsize[i],data2,digit+1);
-			}
+		#pragma omp task if (bsize[i]> 1<<20)
+		{
+			rsort(data+bstart2[i],bsize[i],data2+bstart2[i],digit+1);
 		}
 	}
-	//#pragma omp taskwait
+	#pragma omp taskwait
 	free(bsize);
 	free(bstart);
 	free(bstart2);
@@ -115,9 +105,10 @@ void radixsort(dataType *data, int size){
 		cout<<"OUT OF MEMORY\n";
 		exit(0);
 	}
-	//#pragma omp parallel
+	omp_set_nested(1);
+	#pragma omp parallel
 	{
-		//#pragma omp single
+		#pragma omp single
 		{
 			rsort(data, size, data2, 0);
 		}

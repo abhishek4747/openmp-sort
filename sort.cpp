@@ -13,7 +13,7 @@ using namespace std;
 void pSort(dataType *data, int size, SortType sorter){
 	switch (sorter){
 		case QUICK:
-			quicksort(data,size);
+			pquicksort(data,size);
 			break;
 		case MERGE:		
 			mergesort(data,size);
@@ -22,7 +22,7 @@ void pSort(dataType *data, int size, SortType sorter){
 			radixsort(data,size);
 			break;
 		default:
-			pquicksort(data,size);
+			quicksort(data,size);
 	}
 }
 

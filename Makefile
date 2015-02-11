@@ -2,7 +2,7 @@ T = 10
 P = 1
 S = q
 
-G_ARGS = -fopenmp -fPIC -c -g  -Wall
+G_ARGS = -fopenmp -fPIC -c -g  -Wall 
 
 all:
 	@echo "try 'make test'"
