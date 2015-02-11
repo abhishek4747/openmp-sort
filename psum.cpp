@@ -38,57 +38,31 @@ void swap(dataType *data, int left, int right){
 	data[right] = temp;
 }
 
-int lpartition(dataType *data, int size){
-	if (size==2){
-		if (data[0].key>data[1].key){
-			swap(data,0,1);
-		}
-		return 1;
-	}
-	int pivot = 0;
-	int start = 1;
-	int end = size-1;
-	while (start <end){
-		while (start<end && data[start].key<=data[pivot].key){
-			start++;
-		}
-		while (start<end && data[end].key>data[pivot].key){
-			end--;
-		}
-		if (start<end && data[start].key>data[end].key){
-			swap(data, start, end);
-		}
-	}
-	if (start==1){
-		return 0;
-	}else if (end ==size -1){
-		return 0;
-	}else{	
-	swap(data,start-1, pivot);
-		return start-1;
-	}
+int split ( dataType *a, int upper ){
+	int  p, q;
+	p =  1 ;
+	q = upper - 1 ;
 
-/*	
-	int pivot = 0;
-	int store = size-1;
-	for (int i = 0; i<store; ){
-		if ((long long)data[i].key>(long long)data[pivot].key){
-			swap(data, i, store);
-			store--;
-		}else
-			i++;
-	}	
-	swap(data, pivot, store-1);
-	return store-1;
-	*/
+	while ( q >= p ){
+		while ( a[p].key < a[0].key )
+			p++ ;
+
+		while ( a[q].key > a[0].key )
+			q-- ;
+
+		if ( q > p )
+			swap(a,p,q);
+	}
+	swap(a,0,q);
+	return q ;
 }
 	
 int partition(dataType *data, int size, dataType *data2){
 	if (size<2)
 		return 0;
-	int p = omp_get_num_procs();
+	int p = 5; //omp_get_num_procs();
 	if (size<=p){
-		return lpartition(data, size);
+		return split(data, size);
 	}
 	int *lessp;
 	int *greaterp;
@@ -110,13 +84,12 @@ int partition(dataType *data, int size, dataType *data2){
 	int chunk = ceil(((double)size)/p);
 	p = ceil(((double)size)/chunk);
 
-	cout<<"No. of processors: "<<p<<"\nsize:"<<size<<endl;
+	cout<<"No. of processors: "<<p<<"\tchunk:"<<chunk<<endl;
 	#pragma omp parallel num_threads(p) 
 	{
 		int i = omp_get_thread_num();
 		int start = chunk*i;
 		int end = min((int)chunk*(i+1),size);
-		//cout<<i<<" - "<<start<<" -  "<<end<<endl;
 		/*
 		int store = end-1;
 		for (int j = start; j<=store;){
@@ -128,12 +101,14 @@ int partition(dataType *data, int size, dataType *data2){
 			}
 		}
 		*/
-		int pivot = lpartition(data+start, end-start);	
+		int pivot = split(data+start, end-start);	
+		int store =  start + pivot;
 		//cout<<"store:"<<store<<" pivot:"<<pivot<<endl;
-		int store = start + pivot;
+		cout<<i<<" - "<<start<<" -  "<<pivot<<endl;
 		greaterp[i]=end - store - 1;
 		lessp[i] = store - start + 1;
 	}
+	return 0;
 	psum(lessp,p,lessp2);
 	psum(greaterp,p,greaterp2);
 	free(lessp2);
@@ -182,37 +157,31 @@ int partition(dataType *data, int size, dataType *data2){
 }
 
 void pqsort(dataType *data, int start, int end, dataType *data2){
-	if (start+1>=end){
-		return;
-	} else if (start+2==end){
-		if ((long long)data[start].key> (long long)data[start+1].key){
-			swap(data, start, start+1);
-		}
-	}
-	else if (start+1<end){
-		for(int i=0; i<end-start; i++){
+	if (start+1<end){
+		//cout<<start<<" "<<end<<endl;
+		cout<<"pqsort: ";
+		for(int i=start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
 		}
-		cout<<" ("<<end-start<<")"<<endl;
-		int store = lpartition(data+start, end-start);//, data2+start);
-		for(int i=0; i<end-start; i++){
+		cout<<"-"<<end-start<<endl;
+		int store = partition(data+start, end-start, data2+start);
+		for(int i=start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
 		}
-		cout<<":"<<store<<":"<<endl<<endl;
+		cout<<":"<<store<<":"<<endl;
 		//cout<<start<<" "<<store<<" "<<end<<endl;
-		//for(int i=0; i<end-start; i++){
-		//	cout<<(long long)data[i].key<<", ";
-		//}
-		//cout<<endl;
-			if (store<end)
-			pqsort(data, start, store, data2);
-			if (store+1>start)
-			pqsort(data, store+1, end, data2);
+		cout<<"pqsortt: ";
+		for(int i=start; i<end; i++){
+			cout<<(long long)data[i].key<<", ";
+		}
+		cout<<endl<<endl;
+		exit(0);
+			pqsort(data, start, start+store, data2);
+			pqsort(data, start+ store+1, end, data2);
 	}
 }
 
 void pquicksort(dataType *data, int start, int end){
-	
 	dataType *data2;
 	data2 = (dataType*) malloc((end-start)*sizeof(dataType));
 	pqsort(data, start, end, data2);
@@ -220,35 +189,9 @@ void pquicksort(dataType *data, int start, int end){
 
 int main(){
 	int size = 20;
-	/*
-	int  *data;
-	data = (int *) malloc(size*sizeof(int));
-	int *data2;
-	data2 = (int *) malloc(size*sizeof(int));
-	data[0] = 7;
-	data[1] = 13;
-	data[2] = 18;
-	data[3] = 2;
-	data[4] = 17;
-	data[5] = 1;
-	data[6] = 14;
-	data[7] = 20;
-	data[8] = 6;
-	data[9] = 7;
-	data[10] = 10;
-	data[12] = 15;
-	data[13] = 9;
-	data[14] = 3;
-	data[15] = 16;
-	data[16] = 19;
-	data[17] = 4;
-	data[18] = 11;
-	data[19] = 12;
-	*/
+	
 	dataType *data;
 	data = (dataType*) malloc(size*sizeof(dataType));
-
-	
 	data[0].key = (long long*) 7;
 	data[1].key = (long long*) 13;
 	data[2].key = (long long*) 18;
@@ -275,7 +218,8 @@ int main(){
 	}
 	cout<<endl;
 
-	pquicksort(data, 0, size);
+
+	pquicksort(data, 0,  20);
 
 	for (int i = 0; i<size; i++){
 		cout<<(long long)data[i].key<<", ";
@@ -283,4 +227,28 @@ int main(){
 	cout<<endl;
 	return 0;
 }
-
+/*
+	int  *data;
+	data = (int *) malloc(size*sizeof(int));
+	int *data2;
+	data2 = (int *) malloc(size*sizeof(int));
+	data[0] = 7;
+	data[1] = 13;
+	data[2] = 18;
+	data[3] = 2;
+	data[4] = 17;
+	data[5] = 1;
+	data[6] = 14;
+	data[7] = 20;
+	data[8] = 6;
+	data[9] = 7;
+	data[10] = 10;
+	data[12] = 15;
+	data[13] = 9;
+	data[14] = 3;
+	data[15] = 16;
+	data[16] = 19;
+	data[17] = 4;
+	data[18] = 11;
+	data[19] = 12;
+	*/
