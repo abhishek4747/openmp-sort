@@ -35,7 +35,7 @@ void pSort(dataType *data, int ndata, SortType sorter){
 			free(data2);
 			break;
 		default:
-			othersort();
+			quicksort(data,0,ndata);
 	}
 }
 

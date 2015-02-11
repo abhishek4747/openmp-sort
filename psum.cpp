@@ -38,16 +38,34 @@ void swap(dataType *data, int left, int right){
 	data[right] = temp;
 }
 
+
+int splitp ( dataType *a, int upper , long long *pivot){
+	int  p, q;
+	p =  0 ;
+	q = upper - 1 ;
+
+	while ( q >= p ){
+		while (q>=p && (long long)a[p].key <= (long long)pivot )
+			p++ ;
+
+		while (q>=p && (long long)a[q].key > (long long)pivot )
+			q-- ;
+
+		if ( q > p )
+			swap(a,p,q);
+	}
+	return q ;
+}
 int split ( dataType *a, int upper ){
 	int  p, q;
 	p =  1 ;
 	q = upper - 1 ;
 
 	while ( q >= p ){
-		while ( a[p].key < a[0].key )
+		while ((long long) a[p].key < (long long) a[0].key )
 			p++ ;
 
-		while ( a[q].key > a[0].key )
+		while ((long long) a[q].key > (long long) a[0].key )
 			q-- ;
 
 		if ( q > p )
@@ -60,8 +78,8 @@ int split ( dataType *a, int upper ){
 int partition(dataType *data, int size, dataType *data2){
 	if (size<2)
 		return 0;
-	int p = 5; //omp_get_num_procs();
-	if (size<=p){
+	int p = omp_get_num_procs();
+	if (size<=(p<<12)){
 		return split(data, size);
 	}
 	int *lessp;
@@ -84,7 +102,7 @@ int partition(dataType *data, int size, dataType *data2){
 	int chunk = ceil(((double)size)/p);
 	p = ceil(((double)size)/chunk);
 
-	cout<<"No. of processors: "<<p<<"\tchunk:"<<chunk<<endl;
+	//cout<<"No. of processors: "<<p<<"\tchunk:"<<chunk<<endl;
 	#pragma omp parallel num_threads(p) 
 	{
 		int i = omp_get_thread_num();
@@ -101,18 +119,27 @@ int partition(dataType *data, int size, dataType *data2){
 			}
 		}
 		*/
-		int pivot = split(data+start, end-start);	
+		int pivot = splitp(data+start, end-start, data[0].key);	
 		int store =  start + pivot;
 		//cout<<"store:"<<store<<" pivot:"<<pivot<<endl;
-		cout<<i<<" - "<<start<<" -  "<<pivot<<endl;
+		//cout<<i<<" - "<<start<<" -  "<<pivot<<"\n";
 		greaterp[i]=end - store - 1;
 		lessp[i] = store - start + 1;
 	}
-	return 0;
+	//cout.flush();
 	psum(lessp,p,lessp2);
 	psum(greaterp,p,greaterp2);
 	free(lessp2);
 	free(greaterp2);
+	/*
+	for(int i=0; i<p; i++){
+		cout<<lessp[i]<<", ";
+	}
+	cout<<endl;
+	for(int i=0; i<p; i++){
+		cout<<greaterp[i]<<", ";
+	}
+	cout<<endl;*/
 /*
 	for (int i =0; i<p; i++){
 		cout<<lessp[i]<<", ";
@@ -132,7 +159,8 @@ int partition(dataType *data, int size, dataType *data2){
 	{
 		int i = omp_get_thread_num();
 		int start = chunk*i;
-		int end = min(chunk*(i+1),size);
+		int end = min((int)chunk*(i+1),size);
+
 		int lp = (i>0? lessp[i-1]:0);
 		int dp = lessp[i];
 		
@@ -158,13 +186,21 @@ int partition(dataType *data, int size, dataType *data2){
 
 void pqsort(dataType *data, int start, int end, dataType *data2){
 	if (start+1<end){
+		if (end-start==2){
+			if ((long long)data[start].key>(long long)data[start+1].key)
+				swap(data,start,start+1);
+				return;
+		}			
 		//cout<<start<<" "<<end<<endl;
+		/*
 		cout<<"pqsort: ";
 		for(int i=start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
 		}
-		cout<<"-"<<end-start<<endl;
+		cout<<"="<<end-start<<endl;
+		*/
 		int store = partition(data+start, end-start, data2+start);
+		/*
 		for(int i=start; i<end; i++){
 			cout<<(long long)data[i].key<<", ";
 		}
@@ -175,8 +211,7 @@ void pqsort(dataType *data, int start, int end, dataType *data2){
 			cout<<(long long)data[i].key<<", ";
 		}
 		cout<<endl<<endl;
-		exit(0);
-			pqsort(data, start, start+store, data2);
+		*/	pqsort(data, start, start+store, data2);
 			pqsort(data, start+ store+1, end, data2);
 	}
 }
@@ -219,7 +254,7 @@ int main(){
 	cout<<endl;
 
 
-	pquicksort(data, 0,  20);
+	pquicksort(data, 0,  17);
 
 	for (int i = 0; i<size; i++){
 		cout<<(long long)data[i].key<<", ";

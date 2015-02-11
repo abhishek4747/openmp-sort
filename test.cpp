@@ -18,8 +18,10 @@ int isParallel = 1;
 
 void arrayPrint(dataType *data, int n = NUM_OF_ELEMENTS){
 	for (int i = 0; i < n; ++i){
-		//cout<<(long long)data[i].key<<"\t";
-		cout<<(bitset<64>) ((long long) data[i].key)<<"\n";
+		if (sorttype!=RADIX)
+			cout<<(long long)data[i].key<<"\t";
+		else
+			cout<<(bitset<64>) ((long long) data[i].key)<<"\n";
 		
 	}
 	cout<<"\n\n";
