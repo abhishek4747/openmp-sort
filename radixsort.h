@@ -2,4 +2,4 @@
 	#include "sort.h"
 #endif
 
-void radixsort(dataType *data, int ndata, int digit=0);
+void radixsort(dataType *data, int ndata);

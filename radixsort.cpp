@@ -8,9 +8,8 @@
 
 using namespace std;
 
-#define R 4
+#define R 1
 #define RADIX (1<<R)
-#define BUCKETS RADIX
 
 int shift(int digit){
 	return 64 - R*(1 + digit);
@@ -18,7 +17,16 @@ int shift(int digit){
 
 long long applymask(long long key, int digit){
 	int s  = shift(digit);
-	return (key & (((long long)(RADIX-1))<<s))>>s;
+//	return (key & (((long long)(RADIX-1))<<s))>>s;
+	long long ret =  ((key>>s) & ((long long)(RADIX-1)));
+	if (digit==0){
+		if (ret<(RADIX>>1))
+			return (RADIX>>1) + ret;
+		else
+			return ret- (RADIX>>1);
+	}
+	else
+		return ret;
 }
 
 
@@ -26,14 +34,22 @@ void make_buckets(dataType *data, int size, dataType *data2,int digit, int *bsiz
 
 
 	for (int i = 0; i < size; ++i){
-		int a = applymask((long long)data[i].key, digit);
-		bsize[a] += 1;		
+		int a = applymask(getkey(data,i), digit);
+		bsize[a] += 1;
+		//cout<<(bitset<64>)getkey(data,i)<<" "<<a<<" "<<RADIX-1-a<<endl;		
 	}
+	/*
+	cout<<"Digit:"<<digit<<endl;
+	for (int i= 0; i<RADIX; ++i){
+		cout<<bsize[i]<<", ";
+	}
+	cout<<endl;
+	*/
 	bstart[0] = bstart2[0] = 0;
-	for (int i = 1; i < BUCKETS; ++i){
+	for (int i = 1; i < RADIX; ++i){
 		bstart[i] = bsize[i-1] + bstart[i-1];
 		bstart2[i] = bstart[i];
-		// cout<<bstart[i]<<" -- "<<bstart2[i]<<endl;
+		//cout<<bstart[i]<<" -- "<<bstart2[i]<<endl;
 	}
 	for (int i = 0; i < size;++i){
 		int a = applymask((long long)data[i].key,digit);
@@ -53,56 +69,57 @@ void rsort(dataType *data, int size, dataType *data2, int digit){
 	int *bsize;
 	int *bstart;
 	int *bstart2;
-	bsize = (int*) malloc(BUCKETS*sizeof(int));
-	bstart = (int*) malloc(BUCKETS*sizeof(int));
-	bstart2 = (int*) malloc(BUCKETS*sizeof(int));
+	bsize = (int*) malloc(RADIX*sizeof(int));
+	bstart = (int*) malloc(RADIX*sizeof(int));
+	bstart2 = (int*) malloc(RADIX*sizeof(int));
 	if (bsize==0 || bstart==0 || bstart2==0){
 		cout<<"OUT OF MEMORY.\n";
 		exit(0);
 	}
-	memset(bsize, 0, BUCKETS*sizeof(int));
+	memset(bsize, 0, RADIX*sizeof(int));
 
 	make_buckets(data, size, data2, digit, bsize, bstart, bstart2);
-	// memcpy(bstart2, bstart, BUCKETS*sizeof(int));
+	// memcpy(bstart2, bstart, RADIX*sizeof(int));
 
-	// cout<<"Digit: "<<digit<<" shift: "<<shift(digit)<<" ";
-	// for (int i = 0; i < BUCKETS; ++i){
+	//cout<<"Digit: "<<digit<<" shift: "<<shift(digit)<<" "<<endl;
+	//for (int i = 0; i < RADIX; ++i){
 	// 	cout<<bsize[i]<<","<<bstart2[i]<<"\t";
-	// }
-	// cout<<endl;
+	 //}
+	 //cout<<endl;
 	
 	for (int i = 0; i < size;i++){
 		data[i] = data2[i];
 	}
-	for (int i = 0; i < BUCKETS; ++i){
+	
+	//return;
+	for (int i = 0; i < RADIX; ++i){
 		if (bsize[i]>0){
 			// cout<<"digit:"<<digit<<" Bucket:"<<i<<" start:"<<bstart2[i]<<" size:"<<bsize[i]<<endl;
 			//cout<<"Bucket: "<<i<<" Digit:"<<digit<<endl;
-			#pragma omp task if (bsize[i]> 1<<20)
+			//#pragma omp task if (bsize[i]> 1<<20)
 			{
 				rsort(data+bstart2[i],bsize[i],data2,digit+1);
 			}
 		}
 	}
-#pragma omp taskwait
+	//#pragma omp taskwait
 	free(bsize);
 	free(bstart);
 	free(bstart2);
 }
 
 
-void radixsort(dataType *data, int size, int digit){
+void radixsort(dataType *data, int size){
 	dataType *data2 = (dataType*)malloc(size*sizeof(dataType));
 	if (data2==0){
 		cout<<"OUT OF MEMORY\n";
 		exit(0);
 	}
-	#pragma omp parallel
+	//#pragma omp parallel
 	{
-		#pragma omp single
+		//#pragma omp single
 		{
-			rsort(data, size, data2, digit);
+			rsort(data, size, data2, 0);
 		}
 	}
-	free(data2);
 }
