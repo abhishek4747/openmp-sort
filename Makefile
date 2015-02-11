@@ -5,13 +5,13 @@ S = q
 G_ARGS = -fopenmp -fPIC -c -g  -Wall
 
 all:
-	echo "try 'make test'"
+	@echo "try 'make test'"
 
 bhelper: helper.cpp
 	@g++ $(G_ARGS) helper.cpp
 
-bpsum: psum.cpp
-	@g++ $(G_ARGS) psum.cpp
+bpquick: pquick.cpp
+	@g++ $(G_ARGS) pquick.cpp
 
 bquick: quicksort.cpp
 	@g++ $(G_ARGS) quicksort.cpp 
@@ -28,10 +28,10 @@ bother: othersort.cpp
 bsort: sort.cpp
 	@g++ $(G_ARGS) sort.cpp
 
-ball: bquick bmerge bradix bother bsort bpsum bhelper
+ball: bquick bmerge bradix bother bsort bpquick bhelper
 
 blib: ball
-	@g++ -shared -o libpsort.so quicksort.o mergesort.o radixsort.o othersort.o sort.o psum.o helper.o
+	@g++ -shared -o libpsort.so quicksort.o mergesort.o radixsort.o othersort.o sort.o pquick.o helper.o
 
 btest: blib test.cpp 
 	@g++ -fopenmp test.cpp -o test -L. -lpsort
@@ -42,5 +42,6 @@ test: btest
 clean:
 	rm -f *.o
 	rm -f *.so
-	rm test
+	rm -f test
+	rm -f *.out
 	clear

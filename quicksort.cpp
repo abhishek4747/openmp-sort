@@ -1,16 +1,8 @@
-#include <iostream>
-#include <omp.h>
 #include "quicksort.h"
 #include "helper.h"
 
 
 using namespace std;
-
-inline void swap(dataType *data, int left, int right){
-	dataType temp = data[left];
-	data[left] = data[right];
-	data[right] = temp;
-}
 
 int splitq ( dataType *a, int upper ){
 	int  p, q;

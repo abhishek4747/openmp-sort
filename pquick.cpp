@@ -1,12 +1,9 @@
-#include <iostream>
-#include <stdlib.h>
-#include <omp.h>
-#include <math.h>
-#include "psum.h"
+#include "pquick.h"
 #include "helper.h"
 
 using namespace std;
 
+// must be called from one thread only
 void psum(int *data, int size, int *data2){
 	if (size<2)
 		return;
@@ -32,12 +29,6 @@ void psum(int *data, int size, int *data2){
 	}
 }
 
-
-void swap(dataType *data, int left, int right){
-	dataType temp = data[left];
-	data[left] = data[right];
-	data[right] = temp;
-}
 
 
 int splitp ( dataType *a, int upper , long long *pivot){
@@ -228,68 +219,3 @@ void pquicksort(dataType *data, int size){
 	free(data2);
 }
 
-int main(){
-	int size = 20;
-	
-	dataType *data;
-	data = (dataType*) malloc(size*sizeof(dataType));
-	data[0].key = (long long*) 7;
-	data[1].key = (long long*) 13;
-	data[2].key = (long long*) 18;
-	data[3].key = (long long*) 2;
-	data[4].key = (long long*) 17;
-	data[5].key = (long long*) 1;
-	data[6].key = (long long*) 14;
-	data[7].key = (long long*) 20;
-	data[8].key = (long long*) 6;
-	data[9].key = (long long*) 10;
-	data[10].key = (long long*) 15;
-	data[11].key = (long long*) 9;
-	data[12].key = (long long*) 3;
-	data[13].key = (long long*) 16;
-	data[14].key = (long long*) 19;
-	data[15].key = (long long*) 4;
-	data[16].key = (long long*) 11;
-	data[17].key = (long long*) 12;
-	data[18].key = (long long*) 5;
-	data[19].key = (long long*) 8;
-	
-	for (int i = 0; i<size; i++){
-		cout<<(long long)data[i].key<<", ";
-	}
-	cout<<endl;
-
-
-	pquicksort(data,  17);
-
-	for (int i = 0; i<size; i++){
-		cout<<(long long)data[i].key<<", ";
-	}
-	cout<<endl;
-	return 0;
-}
-/*
-	int  *data;
-	data = (int *) malloc(size*sizeof(int));
-	int *data2;
-	data2 = (int *) malloc(size*sizeof(int));
-	data[0] = 7;
-	data[1] = 13;
-	data[2] = 18;
-	data[3] = 2;
-	data[4] = 17;
-	data[5] = 1;
-	data[6] = 14;
-	data[7] = 20;
-	data[8] = 6;
-	data[9] = 7;
-	data[10] = 10;
-	data[12] = 15;
-	data[13] = 9;
-	data[14] = 3;
-	data[15] = 16;
-	data[16] = 19;
-	data[17] = 4;
-	data[18] = 11;
-	data[19] = 12;
-	*/

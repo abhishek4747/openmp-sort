@@ -3,7 +3,7 @@
 #include <stdlib.h>						// For exit(0)
 #include "sort.h"
 #include "quicksort.h"					// For quicksort
-#include "psum.h"
+#include "pquick.h"
 #include "mergesort.h"					// For mergesort
 #include "radixsort.h"					// For radixsort
 #include "othersort.h"					// For othersort
