@@ -3,6 +3,7 @@
 #include <omp.h>
 #include <math.h>
 #include "psum.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -98,7 +99,7 @@ int partition(dataType *data, int size, dataType *data2){
 		cout<<"OUT OF MEMORY."<<endl;
 		exit(0);
 	}
-	int pivot = 0;
+	//int pivot = 0;
 	int chunk = ceil(((double)size)/p);
 	p = ceil(((double)size)/chunk);
 
@@ -159,7 +160,7 @@ int partition(dataType *data, int size, dataType *data2){
 	{
 		int i = omp_get_thread_num();
 		int start = chunk*i;
-		int end = min((int)chunk*(i+1),size);
+		//int end = min((int)chunk*(i+1),size);
 
 		int lp = (i>0? lessp[i-1]:0);
 		int dp = lessp[i];

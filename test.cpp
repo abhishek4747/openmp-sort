@@ -2,9 +2,10 @@
 #include <time.h>						// For timing
 #include <stdlib.h>						// For exit(0)
 #include <omp.h>
-#include "sort.h"
 #include <bitset>
 #include <set>
+#include "sort.h"
+#include "helper.h"
 
 using namespace std;
 

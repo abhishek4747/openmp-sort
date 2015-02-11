@@ -1,6 +1,7 @@
 #include <iostream>
 #include <omp.h>
 #include "mergesort.h"
+#include "helper.h"
 
 using namespace std;
 

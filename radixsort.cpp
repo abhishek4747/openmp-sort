@@ -4,6 +4,7 @@
 #include <string.h>
 #include <bitset>
 #include "radixsort.h"
+#include "helper.h"
 
 using namespace std;
 

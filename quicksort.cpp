@@ -1,6 +1,7 @@
 #include <iostream>
 #include <omp.h>
 #include "quicksort.h"
+#include "helper.h"
 
 
 using namespace std;
@@ -11,7 +12,24 @@ inline void swap(dataType *data, int left, int right){
 	data[right] = temp;
 }
 
-	
+int splitq ( dataType *a, int upper ){
+	int  p, q;
+	p =  1 ;
+	q = upper - 1 ;
+
+	while ( q >= p ){
+		while ((long long) a[p].key < (long long) a[0].key )
+			p++ ;
+
+		while ((long long) a[q].key > (long long) a[0].key )
+			q-- ;
+
+		if ( q > p )
+			swap(a,p,q);
+	}
+	swap(a,0,q);
+	return q ;
+}
 
 void qsort(dataType *data, int start, int end){
 	if (start+1>=end){
@@ -33,6 +51,7 @@ void qsort(dataType *data, int start, int end){
 		}	
 		swap(data, pi, store);
 		int size = end - start;
+//		int store = start + splitq(data+start, size);
 		#pragma omp task if (size > 1 <<20)
 		{
 			qsort(data, start, store);
