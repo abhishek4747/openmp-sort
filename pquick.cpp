@@ -61,57 +61,45 @@ int partition(dataType *data, int size, dataType *data2){
 	} else{
 		int p = procs;
 		int *lessp;
-		int *greaterp;
 		lessp = (int*) malloc(p*sizeof(int));
-		greaterp = (int*)malloc(p*sizeof(int));
-		if( lessp == 0 || greaterp ==0){
+		if( lessp == 0 ){
 			cout<<"OUT OF MEMORY."<<endl;
 			exit(0);
 		}
 		int *lessp2;
-		int *greaterp2;
 		lessp2 = (int*) malloc(p*sizeof(int));
-		greaterp2 = (int*)malloc(p*sizeof(int));
-		if( lessp2 == 0 || greaterp2 ==0){
+		if( lessp2 == 0 ){
 			cout<<"OUT OF MEMORY."<<endl;
 			exit(0);
 		}
-		//int pivot = 0;
 		int chunk = ceil(((double)size)/p);
 		p = ceil(((double)size)/chunk);
 
-		//cout<<"No. of processors: "<<p<<"\tchunk:"<<chunk<<endl;
 		#pragma omp parallel num_threads(p) 
 		{
 			int i = omp_get_thread_num();
 			int start = chunk*i;
 			int end = min((int)chunk*(i+1),size);
 
-			int pivot = splitp(data+start, end-start, getkey(data,0));	
-			int store =  start + pivot;
-			greaterp[i]=end - store - 1;
-			lessp[i] = store - start + 1;
+			lessp[i] = splitp(data+start, end-start, getkey(data,0))+1;	
 		}
 		
 		psum(lessp,p,lessp2);
-		psum(greaterp,p,greaterp2);
 		free(lessp2);
-		free(greaterp2);
 
 		#pragma omp parallel num_threads(p)
 		{
 			int i = omp_get_thread_num();
 			int start = chunk*i;
-
+			int end = min((int)chunk*(i+1),size);
 			int lp = (i>0? lessp[i-1]:0);
 			int dp = lessp[i];
 			
 			for (int j = 0; j<dp-lp; j++){
 				data2[lp+j] = data[start+j];
 			}
-			int gp = (i>0? greaterp[i-1]:0);
-			int gd = greaterp[i];
-
+			int gp = (i>0?( start - lp):0);
+			int gd = end - dp;
 			for (int j =0; j <gd-gp; j++){
 				data2[lessp[p-1]+gp+j] = data[start+dp-lp+j];
 			}
